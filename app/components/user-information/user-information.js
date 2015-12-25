@@ -7,7 +7,7 @@ var jq = $.noConflict(),
     cancelEmergency = 0;
 
 angular.module("gessami")
-    .controller("UserInformationController", ["$rootScope", "$scope", "$interval", function ($rootScope, $scope, $interval) {
+    .controller("UserInformationController", ["$rootScope", "$scope", "$interval", "PositionProvider", "PulseProvider", "CO2Provider", "HRProvider", "SweatProvider", "SpeedProvider", "TemperatureProvider", function ($rootScope, $scope, $interval, PositionProvider, PulseProvider, CO2Provider, HRProvider, SweatProvider, SpeedProvider, TemperatureProvider) {
         "use strict";
 
         $interval(function () {
@@ -32,125 +32,129 @@ angular.module("gessami")
         }, refreshIndex);
 
         $scope.checkCO2 = function () {
-            var breath = Math.round(Math.random() * 10),
-                co2 = Math.round(Math.random() * 10),
-                alertaBreath = 7,
-                alertaCo2 = 4;
+            CO2Provider.getCO2Data(function (co2Data) {
+                $scope.breath = co2Data.breath;
+                $scope.co2 = co2Data.co2;
 
-            $scope.breath = breath;
-            $scope.co2 = co2;
+                if (co2Data.breath > co2Data.alertaBreath) {
+                    jq('#breathBox').css('border-color', 'red');
+                    alert[6] = 1;
+                } else {
+                    jq('#breathBox').css('border-color', '');
+                    alert[6] = 0;
+                }
 
-            if (breath > alertaBreath) {
-                jq('#breathBox').css('border-color', 'red');
-                alert[6] = 1;
-            } else {
-                jq('#breathBox').css('border-color', '');
-                alert[6] = 0;
-            }
-
-            if (co2 > alertaCo2) {
-                jq('#co2Box').css('border-color', 'red');
-                alert[7] = 1;
-            } else {
-                jq('#co2Box').css('border-color', '');
-                alert[7] = 0;
-            }
+                if (co2Data.co2 > co2Data.alertaCo2) {
+                    jq('#co2Box').css('border-color', 'red');
+                    alert[7] = 1;
+                } else {
+                    jq('#co2Box').css('border-color', '');
+                    alert[7] = 0;
+                }
+            }, function (errorString) {
+                console.log("Error in CO2Provider: " + errorString);
+            });
         };
 
         $scope.checkHR = function () {
-            var anterior = 0,
-                hr = Math.round(Math.random() * 10),
-                incremental = Math.sqrt(Math.pow(hr - anterior, 2)),
-                alertaHR = 7,
-                alertaInc = 4;
+            var anterior;
 
-            $scope.hr = hr;
-            $scope.incremental = incremental;
-            anterior = hr;
+            HRProvider.getHRData(function (hrData) {
+                $scope.hr = hrData.hr;
+                $scope.incremental = hrData.incremental;
+                anterior = hrData.hr;
 
-            if (hr > alertaHR) {
-                jq('#hrBox').css('border-color', 'red');
-                alert[3] = 1;
-            } else {
-                jq('#hrBox').css('border-color', '');
-                alert[3] = 0;
-            }
+                if (hrData.hr > hrData.alertaHR) {
+                    jq('#hrBox').css('border-color', 'red');
+                    alert[3] = 1;
+                } else {
+                    jq('#hrBox').css('border-color', '');
+                    alert[3] = 0;
+                }
 
-            if (incremental > alertaInc) {
-                jq('#incrementalBox').css('border-color', 'red');
-                alert[4] = 1;
-            } else {
-                jq('#incrementalBox').css('border-color', '');
-                alert[4] = 0;
-            }
+                if (hrData.incremental > hrData.alertaInc) {
+                    jq('#incrementalBox').css('border-color', 'red');
+                    alert[4] = 1;
+                } else {
+                    jq('#incrementalBox').css('border-color', '');
+                    alert[4] = 0;
+                }
+            }, function (errorString) {
+                console.log("Error in PositionProvider: " + errorString);
+            });
         };
 
         $scope.checkPosition = function () {
-            var locationX = Math.round(Math.random() * 10),
-                locationY = Math.round(Math.random() * 10);
-
-            $scope.locationX = locationX;
-            $scope.locationY = locationY;
+            PositionProvider.getPositionData(function (positionData) {
+                $scope.locationX = positionData.locationX;
+                $scope.locationY = positionData.locationY;
+            }, function (errorString) {
+                console.log("Error in PositionProvider: " + errorString);
+            });
         };
 
         $scope.checkPulse = function () {
-            var pulso = Math.round(Math.random() * 10),
-                alerta = 6;
+            PulseProvider.getPulseData(function (pulseData) {
+                $scope.pulse = pulseData.pulso;
 
-            $scope.pulse = pulso;
-
-            if (pulso > alerta) {
-                jq('#pulseBox').css('border-color', 'red');
-                alert[0] = 1;
-            } else {
-                jq('#pulseBox').css('border-color', '');
-                alert[0] = 0;
-            }
+                if (pulseData.pulso > pulseData.alerta) {
+                    jq('#pulseBox').css('border-color', 'red');
+                    alert[0] = 1;
+                } else {
+                    jq('#pulseBox').css('border-color', '');
+                    alert[0] = 0;
+                }
+            }, function (errorString) {
+                console.log("Error in PulseProvider: " + errorString);
+            });
         };
 
         $scope.checkSpeed = function () {
-            var velocidad = Math.round(Math.random() * 100),
-                alerta = 80;
+            SpeedProvider.getSpeedData(function (speedData) {
+                $scope.speed = speedData.velocidad;
 
-            $scope.speed = velocidad;
-
-            if (velocidad > alerta) {
-                jq('#speedBox').css('border-color', 'red');
-                alert[1] = 1;
-            } else {
-                jq('#speedBox').css('border-color', '');
-                alert[1] = 0;
-            }
+                if (speedData.velocidad > speedData.alerta) {
+                    jq('#speedBox').css('border-color', 'red');
+                    alert[1] = 1;
+                } else {
+                    jq('#speedBox').css('border-color', '');
+                    alert[1] = 0;
+                }
+            }, function (errorString) {
+                console.log("Error in PulseProvider: " + errorString);
+            });
         };
 
         $scope.checkSweat = function () {
-            var sudor = Math.round(Math.random() * 100),
-                alerta = 70;
+            SweatProvider.getSweatData(function (sweatData) {
+                $scope.sweat = sweatData.sudor;
 
-            $scope.sweat = sudor;
-
-            if (sudor > alerta) {
-                jq('#sweatBox').css('border-color', 'red');
-                alert[2] = 1;
-            } else {
-                jq('#sweatBox').css('border-color', '');
-                alert[2] = 0;
-            }
+                if (sweatData.sudor > sweatData.alerta) {
+                    jq('#sweatBox').css('border-color', 'red');
+                    alert[2] = 1;
+                } else {
+                    jq('#sweatBox').css('border-color', '');
+                    alert[2] = 0;
+                }
+            }, function (errorString) {
+                console.log("Error in PulseProvider: " + errorString);
+            });
         };
 
         $scope.checkTemperature = function () {
-            var temperature = Math.round(Math.random() * 10),
-                alerta = 7;
+            TemperatureProvider.getTemperatureData(function (temperatureData) {
+                $scope.temperature = temperatureData.temperature;
 
-            $scope.temperature = temperature;
-
-            if (temperature > alerta) {
-                jq('#temperatureBox').css('border-color', 'red');
-                alert[5] = 1;
-            } else {
-                jq('#temperatureBox').css('border-color', '');
-                alert[5] = 0;
-            }
+                if (temperatureData.temperature > temperatureData.alerta) {
+                    jq('#temperatureBox').css('border-color', 'red');
+                    alert[5] = 1;
+                } else {
+                    jq('#temperatureBox').css('border-color', '');
+                    alert[5] = 0;
+                }
+            }, function (errorString) {
+                console.log("Error in PulseProvider: " + errorString);
+            });
         };
 
         $scope.emergency = function () {
